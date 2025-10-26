@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
@@ -31,4 +31,4 @@ EXPOSE 8000
 EXPOSE 5678
 
 # Run the application with debug support
-CMD ["sh", "-c", "if [ \"$DEBUG\" = \"true\" ]; then python3 -m debugpy --listen 0.0.0.0:5678 --wait-for-client -m uvicorn main:app --reload --host 0.0.0.0 --port 8000; else uvicorn main:app --host 0.0.0.0 --port 8000; fi"]
+CMD ["sh", "-c", "if [ \"$DEBUG\" = \"true\" ]; then python3 -m debugpy --listen 0.0.0.0:5678 -m uvicorn main:app --reload --host 0.0.0.0 --port 8000; else uvicorn main:app --host 0.0.0.0 --port 8000; fi"]
