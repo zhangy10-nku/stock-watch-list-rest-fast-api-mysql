@@ -1,0 +1,68 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug FastAPI in Docker",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5678
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/app",
+          "remoteRoot": "/app"
+        }
+      ],
+      "justMyCode": false,
+      "showReturnValue": true
+    },
+    {
+      "name": "Debug FastAPI with Uvicorn",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DATABASE_URL": "mysql+pymysql://stockuser:stockpass@localhost:3306/stockwatchlist",
+        "GOOGLE_CLIENT_ID": "${env:GOOGLE_CLIENT_ID}",
+        "GOOGLE_CLIENT_SECRET": "${env:GOOGLE_CLIENT_SECRET}"
+      },
+      "args": [
+        "app.main:app",
+        "--host", "0.0.0.0",
+        "--port", "8000",
+        "--reload"
+      ],
+      "jinja": true,
+      "justMyCode": false,
+      "stopOnEntry": false,
+      "showReturnValue": true
+    },
+    {
+      "name": "Debug FastAPI (Local DB)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DATABASE_URL": "mysql+pymysql://stockuser:stockpass@localhost:3306/stockwatchlist",
+        "GOOGLE_CLIENT_ID": "${env:GOOGLE_CLIENT_ID}",
+        "GOOGLE_CLIENT_SECRET": "${env:GOOGLE_CLIENT_SECRET}"
+      },
+      "args": [
+        "app.main:app",
+        "--host", "0.0.0.0",
+        "--port", "8000",
+        "--reload"
+      ],
+      "jinja": true,
+      "justMyCode": false,
+      "stopOnEntry": false,
+      "showReturnValue": true
+    }
+  ]
+}
