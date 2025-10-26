@@ -1,0 +1,48 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: stock-watchlist-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-stockwatchlist}
+      MYSQL_USER: ${MYSQL_USER:-stockuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-stockpass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - stock-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stock-watchlist-api
+    environment:
+      DATABASE_URL: mysql+pymysql://${MYSQL_USER:-stockuser}:${MYSQL_PASSWORD:-stockpass}@mysql:3306/${MYSQL_DATABASE:-stockwatchlist}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      DEBUG: ${DEBUG:-false}
+    ports:
+      - "8000:8000"
+      - "5678:5678"  # Debug port
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - stock-network
+    volumes:
+      - ./app:/app
+
+networks:
+  stock-network:
+    driver: bridge
+
+volumes:
+  mysql_data:

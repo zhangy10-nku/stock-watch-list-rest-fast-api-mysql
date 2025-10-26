@@ -1,0 +1,24 @@
+{
+  "name": "FastAPI Development Container",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "fastapi",
+  "workspaceFolder": "/app",
+  "shutdownAction": "stopCompose",
+  "postCreateCommand": "pip install debugpy",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.debugpy",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "FastAPI",
+      "onAutoForward": "notify"
+    }
+  }
+}
