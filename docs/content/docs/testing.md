@@ -407,8 +407,8 @@ docker-compose exec -T mysql mysql -u stockuser -p stockwatchlist < backup.sql
 
 After testing the API:
 
-1. **[Explore API Documentation](../api/)** - Detailed endpoint documentation
-2. **[Development Guide](../architecture/)** - Architecture and development info
+1. **[Explore API Documentation]({{ "/api/" | relURL }})** - Detailed endpoint documentation
+2. **[Development Guide](../architecture/)** - Architecture and development info  
 3. **[OAuth Setup](../oauth-setup/)** - Detailed OAuth configuration
 
 Need help? Check the [troubleshooting section](../quick-start/#troubleshooting) in the quick start guide.
