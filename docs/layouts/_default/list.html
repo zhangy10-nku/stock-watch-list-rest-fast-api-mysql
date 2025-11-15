@@ -1,0 +1,31 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+
+{{ if .Description }}
+<p class="lead">{{ .Description }}</p>
+{{ end }}
+
+{{ .Content }}
+
+{{ if .Pages }}
+<div class="row mt-4">
+    {{ range .Pages }}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{{ .RelPermalink }}" class="text-decoration-none">{{ .Title }}</a>
+                </h5>
+                {{ if .Description }}
+                <p class="card-text text-muted">{{ .Description }}</p>
+                {{ else if .Summary }}
+                <p class="card-text text-muted">{{ .Summary | truncate 100 }}</p>
+                {{ end }}
+                <a href="{{ .RelPermalink }}" class="btn btn-outline-primary btn-sm">Read more <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+    {{ end }}
+</div>
+{{ end }}
+{{ end }}

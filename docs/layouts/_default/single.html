@@ -1,0 +1,26 @@
+{{ define "main" }}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ .Title }}</h1>
+    {{ if .Params.edit_page }}
+    <a href="{{ .Site.Params.github_repo }}/edit/main/docs/content/{{ .File.Path }}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-edit"></i> Edit this page
+    </a>
+    {{ end }}
+</div>
+
+{{ if .Description }}
+<p class="lead">{{ .Description }}</p>
+{{ end }}
+
+<div class="content">
+    {{ .Content }}
+</div>
+
+{{ if .NextInSection }}
+<div class="mt-5 pt-4 border-top">
+    <a href="{{ .NextInSection.RelPermalink }}" class="btn btn-primary">
+        Next: {{ .NextInSection.Title }} <i class="fas fa-arrow-right"></i>
+    </a>
+</div>
+{{ end }}
+{{ end }}

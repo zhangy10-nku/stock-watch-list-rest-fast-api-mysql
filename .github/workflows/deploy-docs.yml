@@ -1,0 +1,90 @@
+name: Deploy Hugo Documentation to GitHub Pages
+
+on:
+  # Trigger on push to main branch
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - '.github/workflows/deploy-docs.yml'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+# Set permissions for GitHub Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Ensure only one deployment runs at a time
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history for Hugo's .GitInfo and .Lastmod
+          fetch-depth: 0
+      
+      - name: 🔧 Setup Pages
+        id: pages
+        uses: actions/configure-pages@v4
+      
+      - name: 🐳 Setup Hugo with Docker
+        run: |
+          echo "🚀 Setting up Hugo environment..."
+          echo "Hugo image: klakegg/hugo:0.111.3"
+          docker --version
+      
+      - name: 🏗️ Build Hugo site
+        run: |
+          echo "📝 Building Hugo documentation site..."
+          cd docs
+          
+          # Build with Docker Hugo
+          docker run --rm \
+            -v "$(pwd):/src" \
+            -e HUGO_ENV=production \
+            klakegg/hugo:0.111.3 \
+            --minify \
+            --baseURL "${{ steps.pages.outputs.base_url }}"
+          
+          echo "✅ Hugo build completed"
+          echo "📊 Site statistics:"
+          find public -type f -name "*.html" | wc -l | xargs echo "HTML files:"
+          find public -type f -name "*.css" | wc -l | xargs echo "CSS files:"
+          find public -type f -name "*.js" | wc -l | xargs echo "JS files:"
+          du -sh public | cut -f1 | xargs echo "Total size:"
+      
+      - name: 📤 Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      
+      - name: 📋 Deployment Summary
+        run: |
+          echo "🎉 Documentation deployed successfully!"
+          echo "🌐 Site URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "📚 Documentation: ${{ steps.deployment.outputs.page_url }}docs/"
+          echo "📡 API Reference: ${{ steps.deployment.outputs.page_url }}api/"

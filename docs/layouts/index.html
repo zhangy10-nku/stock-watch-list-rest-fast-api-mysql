@@ -1,0 +1,104 @@
+{{ define "main" }}
+<div class="hero-section text-center py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 0.5rem;">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">{{ .Site.Title }}</h1>
+        <p class="lead mb-4">A multi-containerized stock watchlist REST API built with FastAPI, MySQL, and Google OAuth authentication.</p>
+        
+        <div class="mb-4">
+            <span class="badge bg-light text-dark me-2"><i class="fas fa-rocket"></i> FastAPI</span>
+            <span class="badge bg-light text-dark me-2"><i class="fas fa-database"></i> MySQL</span>
+            <span class="badge bg-light text-dark me-2"><i class="fas fa-shield-alt"></i> OAuth 2.0</span>
+            <span class="badge bg-light text-dark"><i class="fab fa-docker"></i> Docker</span>
+        </div>
+        
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+            <a href="/docs/" class="btn btn-light btn-lg me-md-2">
+                <i class="fas fa-rocket"></i> Get Started
+            </a>
+            <a href="{{ .Site.Params.github_repo }}" class="btn btn-outline-light btn-lg">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
+    </div>
+</div>
+
+{{ .Content }}
+
+<div class="row mt-5">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <div class="text-primary mb-3" style="font-size: 3rem;">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h5 class="card-title">Secure Authentication</h5>
+                <p class="card-text">Google OAuth 2.0 integration with async token validation for secure user authentication.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <div class="text-success mb-3" style="font-size: 3rem;">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h5 class="card-title">Complete CRUD API</h5>
+                <p class="card-text">Full Create, Read, Update, Delete operations for stock watchlist management with user isolation.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <div class="text-info mb-3" style="font-size: 3rem;">
+                    <i class="fab fa-docker"></i>
+                </div>
+                <h5 class="card-title">Docker Ready</h5>
+                <p class="card-text">Multi-container setup with MySQL and FastAPI in separate, orchestrated containers.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <div class="text-warning mb-3" style="font-size: 3rem;">
+                    <i class="fab fa-python"></i>
+                </div>
+                <h5 class="card-title">Modern Python</h5>
+                <p class="card-text">Built with Python 3.13 and FastAPI for maximum performance and developer experience.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <div class="text-danger mb-3" style="font-size: 3rem;">
+                    <i class="fas fa-bug"></i>
+                </div>
+                <h5 class="card-title">VS Code Debugging</h5>
+                <p class="card-text">Complete debugging setup with breakpoints and remote debugging support.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <div class="text-secondary mb-3" style="font-size: 3rem;">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h5 class="card-title">One-Command Setup</h5>
+                <p class="card-text">Professional deployment scripts for easy setup and grading.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info mt-5" role="alert">
+    <h5><i class="fas fa-graduation-cap"></i> Perfect for CS640 Coursework</h5>
+    <p class="mb-2">Professional deployment scripts and comprehensive documentation make this perfect for academic evaluation.</p>
+    <code>./setup.sh</code> - One command to rule them all!
+</div>
+{{ end }}

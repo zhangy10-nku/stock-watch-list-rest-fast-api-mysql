@@ -1,0 +1,41 @@
+baseURL = "https://zhangy10-nku.github.io/stock-watch-list-rest-fast-api-mysql/"
+languageCode = "en-us"
+title = "Stock Watchlist API Documentation"
+
+# No theme - using custom minimal layouts
+
+[params]
+  # Repository configuration
+  github_repo = "https://github.com/zhangy10-nku/stock-watch-list-rest-fast-api-mysql"
+  version = "1.0.0"
+
+# Menu configuration
+[menu]
+  [[menu.main]]
+    name = "Documentation"
+    url = "/docs/"
+    weight = 10
+  [[menu.main]]
+    name = "API Reference" 
+    url = "/api/"
+    weight = 20
+  [[menu.main]]
+    name = "GitHub"
+    url = "https://github.com/zhangy10-nku/stock-watch-list-rest-fast-api-mysql"
+    weight = 30
+
+# Markup settings
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.highlight]
+    style = "github"
+    lineNos = true
+    anchorLineNos = false
+    codeFences = true
+    guessSyntax = false
+    hl_Lines = ""
+    noClasses = false
+    noHl = false
+    tabWidth = 4

@@ -81,8 +81,31 @@ This application consists of two Docker containers:
 ### Prerequisites
 
 - Docker and Docker Compose installed
-- A Google account
+- A Google account  
 - Git
+
+### 🚀 One-Command Setup (Recommended)
+
+This project includes professional deployment scripts that automate the entire setup process, from prerequisite checking to OAuth configuration to API testing.
+
+```bash
+git clone <repository-url>
+cd stock-watch-list-rest-fast-api-mysql
+./setup.sh
+```
+
+**That's it!** The setup script will:
+- ✅ Check all prerequisites (Docker, ports, etc.)
+- ✅ Prompt for your Google OAuth credentials
+- ✅ Create `.env` file automatically
+- ✅ Build and start containers
+- ✅ Wait for services to be ready
+- ✅ Test API endpoints
+- ✅ Show you exactly how to use the API
+
+### Manual Setup (Alternative)
+
+If you prefer manual setup:
 
 ### 1. Clone the repository
 
@@ -123,7 +146,7 @@ docker-compose up -d --build
 
 This will:
 - Build the FastAPI container with Python 3.13
-- Start MySQL container
+- Start MySQL container  
 - Initialize the database with the schema
 - Start FastAPI on `http://localhost:8000`
 
@@ -136,6 +159,45 @@ docker-compose ps
 You should see both containers running:
 - `stock-watchlist-mysql` on port 3306
 - `stock-watchlist-api` on port 8000
+
+## 🛠️ Deployment Scripts
+
+This project includes professional deployment scripts for easy management:
+
+### Setup Script (`setup.sh`)
+**One command to set up everything:**
+```bash
+./setup.sh                 # Standard setup
+./setup.sh --rebuild       # Force rebuild containers
+./setup.sh --clean         # Clean setup (removes old data)
+```
+
+**Features:**
+- ✅ Checks Docker installation and prerequisites
+- ✅ Verifies port availability (8000, 3306)
+- ✅ Interactive Google OAuth credential setup
+- ✅ Creates `.env` file automatically
+- ✅ Builds and starts containers with health checks
+- ✅ Tests API endpoints
+- ✅ Provides helpful next steps and commands
+
+### Deployment Script (`deploy.sh`)
+**Deploy to different environments:**
+```bash
+./deploy.sh local          # Local development (default)
+./deploy.sh staging        # Staging environment  
+./deploy.sh production     # Production deployment
+./deploy.sh status         # Check deployment status
+```
+
+### Cleanup Script (`cleanup.sh`)
+**Clean up resources:**
+```bash
+./cleanup.sh --containers  # Stop and remove containers only
+./cleanup.sh --volumes     # Also remove volumes (deletes data)
+./cleanup.sh --images      # Also remove Docker images
+./cleanup.sh --all         # Complete reset to fresh state
+```
 
 ### 5. Get a test token
 
@@ -541,13 +603,31 @@ See `.env.example` for all available environment variables:
 
 ## Managing the Application
 
+### 🚀 Using Deployment Scripts (Recommended)
+
+```bash
+# Quick setup or rebuild
+./setup.sh --rebuild
+
+# Check status
+./deploy.sh status  
+
+# Clean restart
+./cleanup.sh --containers && ./setup.sh
+
+# Complete reset (removes all data)
+./cleanup.sh --all && ./setup.sh
+```
+
+### 🔧 Manual Docker Commands
+
 ### View logs
 
 ```bash
 # All services
 docker-compose logs -f
 
-# Specific service
+# Specific service  
 docker-compose logs -f fastapi
 docker-compose logs -f mysql
 ```
@@ -924,6 +1004,77 @@ DATABASE_URL=mysql+pymysql://stockuser:stockpass@mysql:3306/stockwatchlist
 # Debug Mode (optional)
 DEBUG=false                           # Set to 'true' for VS Code debugging
 ```
+
+---
+
+## 🎯 For Your Professor 
+
+**One-command deployment for easy grading:**
+
+```bash
+git clone <repository-url>
+cd stock-watch-list-rest-fast-api-mysql
+./setup.sh
+```
+
+The setup script will:
+1. ✅ Check all prerequisites automatically
+2. ✅ Guide you through OAuth setup (just need Google Client ID/Secret)
+3. ✅ Build and start everything with Docker
+4. ✅ Test all endpoints 
+5. ✅ Provide sample curl commands for testing
+
+**Testing the API:**
+```bash
+# Test public endpoints
+./test-api.sh
+
+# Test with authentication (after getting Google OAuth token)
+./test-api.sh YOUR_GOOGLE_OAUTH_TOKEN
+```
+
+**Complete cleanup if needed:**
+```bash
+./cleanup.sh --all
+```
+
+---
+
+## Script Reference
+
+| Script | Purpose | Usage |
+|--------|---------|-------|
+| `setup.sh` | One-command setup and deployment | `./setup.sh [--rebuild\|--clean]` |
+| `deploy.sh` | Multi-environment deployment | `./deploy.sh [local\|staging\|production]` |
+| `cleanup.sh` | Clean up resources | `./cleanup.sh [--containers\|--volumes\|--all]` |
+| `test-api.sh` | Test API endpoints | `./test-api.sh [OAUTH_TOKEN]` |
+| `docs/hugo-dev.sh` | Hugo documentation development | `./docs/hugo-dev.sh [serve\|build\|clean]` |
+
+## 📚 Documentation
+
+This project includes comprehensive Hugo-based documentation that automatically deploys to GitHub Pages:
+
+- **📖 Live Documentation**: Available at GitHub Pages (auto-deployed)
+- **🚀 Local Development**: Use `./docs/hugo-dev.sh serve` to preview locally
+- **🐳 Docker-Based**: No local Hugo/Node.js installation required
+- **🔄 Auto-Deploy**: Pushes to `main` automatically update documentation
+
+### Hugo Development
+
+```bash
+# Start development server with auto-reload
+./docs/hugo-dev.sh serve
+
+# Build production site
+./docs/hugo-dev.sh build  
+
+# View all commands
+./docs/hugo-dev.sh help
+```
+
+The documentation site will be available at:
+- **Local**: http://localhost:1313/stock-watch-list-rest-fast-api-mysql/
+- **Production**: https://zhangy10-nku.github.io/stock-watch-list-rest-fast-api-mysql/
 
 ---
 
