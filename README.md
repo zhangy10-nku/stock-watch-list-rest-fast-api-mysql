@@ -2,28 +2,301 @@
 
 A multi-containerized stock watchlist REST API built with FastAPI, MySQL, and Google OAuth authentication.
 
+---
+
+# 🎓 **CS640: IMPORTANT - PLEASE READ** 🎓
+
+## **📌 Instead of using Laravel, I'm using FastAPI Python back-end REST framework to write this app. I'm using MySQL on a separate docker container.**
+
+## **📖 Please review the rest of this README for:**
+- **🏗️ Architecture diagram**
+- **🐳 Docker setup details**
+- **⚙️ Setup instructions**
+- **🧪 Sample curl commands for testing**
+
+---
+
+## Table of Contents
+- [Architecture](#architecture)
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Quick Start](#quick-start)
+- [Testing the API](#testing-the-api)
+- [API Endpoints](#api-endpoints)
+- [API Documentation](#api-documentation)
+- [Development & Debugging](#development)
+- [OAuth Setup (Detailed)](#oauth-setup-detailed)
+- [Troubleshooting](#troubleshooting)
+
 ## Architecture
 
 This application consists of two Docker containers:
-- **MySQL**: Database for storing stock watchlist data
-- **FastAPI**: Python REST API for managing stock watchlist items with Google OAuth authentication
+- **MySQL 8.0**: Database for storing stock watchlist data with persistent volumes
+- **FastAPI (Python 3.13)**: Modern Python REST API with Google OAuth authentication, running with uvicorn
+
+```
+┌─────────────────────┐    ┌─────────────────────────┐
+│   Client/Browser    │    │  Docker Network         │
+│                     │    │                         │
+│  • curl/Postman     │    │  ┌─────────────────────┐│
+│  • Web Browser      │───▶│  │   FastAPI:8000      ││
+│  • OAuth Token      │8000│  │   Python 3.13       ││
+│                     │    │  │   + debugpy:5678    ││
+└─────────────────────┘    │  └──────────┬──────────┘│
+                           │             │           │
+                           │  ┌──────────▼──────────┐│
+                           │  │   MySQL:3306        ││
+                           │  │   Database Storage  ││
+                           │  └─────────────────────┘│
+                           └─────────────────────────┘
+```
 
 ## Features
 
-- 🔐 Google OAuth 2.0 authentication
-- 📊 Stock watchlist CRUD operations
-- 🐳 Multi-container Docker setup
-- 🔄 RESTful API design
-- 🗄️ MySQL database persistence
-- 👤 User-specific data isolation (based on Google account)
+- 🔐 **Google OAuth 2.0 Authentication**: Secure token-based authentication
+- 📊 **Stock Watchlist CRUD**: Complete Create, Read, Update, Delete operations
+- 🐳 **Multi-Container Docker**: MySQL and FastAPI in separate containers
+- 🔄 **RESTful API Design**: Standard REST endpoints with proper HTTP methods
+- 🗄️ **MySQL Persistence**: Data stored in MySQL with proper indexes
+- 👤 **User Isolation**: Each user's stocks are isolated by their Google account
+- 🐍 **Python 3.13**: Latest Python with performance improvements
+- 🚀 **Fast & Async**: Async OAuth verification with aiohttp
+- 🔧 **VS Code Debugging**: Full debugging support with breakpoints
 
-## Prerequisites
+## Technologies Used
 
-- Docker and Docker Compose
+- **FastAPI**: Modern, fast Python web framework for building APIs
+- **Python 3.13**: Latest Python with significant performance improvements
+- **SQLAlchemy**: SQL toolkit and ORM for database operations
+- **PyMySQL**: Pure Python MySQL database adapter
+- **Google OAuth 2.0**: Secure authentication and identity management
+- **Docker & Docker Compose**: Multi-container orchestration
+- **MySQL 8.0**: Enterprise-grade relational database
+- **uv**: Fast Python package installer and resolver
+- **debugpy**: Python debugging for VS Code
+- **aiohttp**: Async HTTP client for non-blocking OAuth verification
+
+## Quick Start
+
+### Prerequisites
+
+- Docker and Docker Compose installed
 - A Google account
 - Git
 
-## Google OAuth Setup
+### 1. Clone the repository
+
+```bash
+git clone <repository-url>
+cd stock-watch-list-rest-fast-api-mysql
+```
+
+### 2. Set up environment variables
+
+Create a `.env` file in the project root:
+
+```bash
+# MySQL Configuration
+MYSQL_ROOT_PASSWORD=rootpassword
+MYSQL_DATABASE=stockwatchlist
+MYSQL_USER=stockuser
+MYSQL_PASSWORD=stockpass
+
+# Google OAuth Configuration (get these from Google Cloud Console)
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+
+# FastAPI Configuration
+DATABASE_URL=mysql+pymysql://stockuser:stockpass@mysql:3306/stockwatchlist
+
+# Debug Mode (optional - set to true for VS Code debugging)
+DEBUG=false
+```
+
+**📝 Note**: To get your Google OAuth credentials, see the [OAuth Setup section](#oauth-setup-detailed) below.
+
+### 3. Start the application
+
+```bash
+docker-compose up -d --build
+```
+
+This will:
+- Build the FastAPI container with Python 3.13
+- Start MySQL container
+- Initialize the database with the schema
+- Start FastAPI on `http://localhost:8000`
+
+### 4. Verify containers are running
+
+```bash
+docker-compose ps
+```
+
+You should see both containers running:
+- `stock-watchlist-mysql` on port 3306
+- `stock-watchlist-api` on port 8000
+
+### 5. Get a test token
+
+To test the API, you need a Google OAuth token. Quick options:
+
+**Option 1: OAuth Playground (Fastest)**
+1. Go to [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground/)
+2. Click the gear icon ⚙️, check "Use your own OAuth credentials"
+3. Enter your Client ID and Client Secret
+4. Select "Google OAuth2 API v2" → check `userinfo.email` and `userinfo.profile`
+5. Authorize and get your **ID token** (not access token!)
+
+**Option 2: Use the detailed [OAuth Setup](#oauth-setup-detailed) section below**
+
+## Testing the API
+
+### Get current user info
+
+```bash
+curl -X GET "http://localhost:8000/me" \
+  -H "Authorization: Bearer YOUR_GOOGLE_ID_TOKEN"
+```
+
+**Response:**
+```json
+{
+  "sub": "114357175967131345226",
+  "preferred_username": "your.email@gmail.com",
+  "email": "your.email@gmail.com"
+}
+```
+
+### Create a stock
+
+```bash
+curl -X POST "http://localhost:8000/stocks" \
+  -H "Authorization: Bearer YOUR_GOOGLE_ID_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "symbol": "AAPL",
+    "name": "Apple Inc.",
+    "price": 175.50
+  }'
+```
+
+**Response:**
+```json
+{
+  "id": 1,
+  "symbol": "AAPL",
+  "name": "Apple Inc.",
+  "price": 175.5,
+  "user_id": "114357175967131345226",
+  "created_at": "2025-11-15T19:30:00",
+  "updated_at": "2025-11-15T19:30:00"
+}
+```
+
+### Get all stocks for the authenticated user
+
+```bash
+curl -X GET "http://localhost:8000/stocks" \
+  -H "Authorization: Bearer YOUR_GOOGLE_ID_TOKEN"
+```
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "symbol": "AAPL",
+    "name": "Apple Inc.",
+    "price": 175.5,
+    "user_id": "114357175967131345226",
+    "created_at": "2025-11-15T19:30:00",
+    "updated_at": "2025-11-15T19:30:00"
+  }
+]
+```
+
+### Get a specific stock by ID
+
+```bash
+curl -X GET "http://localhost:8000/stocks/1" \
+  -H "Authorization: Bearer YOUR_GOOGLE_ID_TOKEN"
+```
+
+### Update a stock
+
+```bash
+curl -X PUT "http://localhost:8000/stocks/1" \
+  -H "Authorization: Bearer YOUR_GOOGLE_ID_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Apple Inc. (Updated)",
+    "price": 180.25
+  }'
+```
+
+### Delete a stock
+
+```bash
+curl -X DELETE "http://localhost:8000/stocks/1" \
+  -H "Authorization: Bearer YOUR_GOOGLE_ID_TOKEN"
+```
+
+**Response:**
+```json
+{
+  "message": "Stock deleted successfully"
+}
+```
+
+## API Endpoints
+
+| Method | Endpoint | Description | Auth Required | Example Response |
+|--------|----------|-------------|---------------|------------------|
+| GET | `/` | Root endpoint with API info | No | `{"message": "Stock Watchlist API"}` |
+| GET | `/health` | Health check | No | `{"status": "healthy"}` |
+| GET | `/me` | Get current authenticated user info | Yes | User object with email |
+| GET | `/stocks` | Get all stocks for authenticated user | Yes | Array of stock objects |
+| POST | `/stocks` | Create a new stock | Yes | Created stock object |
+| GET | `/stocks/{id}` | Get specific stock by ID | Yes | Stock object |
+| PUT | `/stocks/{id}` | Update a stock (name/price) | Yes | Updated stock object |
+| DELETE | `/stocks/{id}` | Delete a stock | Yes | Success message |
+
+## API Documentation
+
+Once the application is running, you can access interactive API documentation:
+
+- **Swagger UI**: http://localhost:8000/docs
+  - Interactive API explorer
+  - Try out endpoints directly in the browser
+  - View request/response schemas
+
+- **ReDoc**: http://localhost:8000/redoc
+  - Clean, professional API documentation
+  - Better for reading and understanding the API
+
+**Note**: To test authenticated endpoints in Swagger UI, click "Authorize" and add `Bearer YOUR_TOKEN` in the value field.
+
+## Project Structure
+
+```
+.
+├── app/
+│   └── main.py                 # FastAPI application with OAuth and CRUD
+├── .vscode/
+│   ├── launch.json             # VS Code debug configurations
+│   └── settings.json           # VS Code settings
+├── docker-compose.yml          # Multi-container orchestration
+├── Dockerfile                  # FastAPI container with Python 3.13
+├── pyproject.toml              # uv dependency configuration
+├── requirements.txt            # Python dependencies
+├── init.sql                    # MySQL database initialization
+├── .env                        # Environment variables (not in git)
+├── .gitignore                  # Git ignore rules
+└── README.md                   # This file
+```
+
+## Development
 
 ### Step 1: Create a Google Cloud Project
 
@@ -266,16 +539,41 @@ See `.env.example` for all available environment variables:
 - **Google OAuth**: Client ID and Client Secret from Google Cloud Console
 - **FastAPI**: Database connection string
 
-## Stopping the Application
+## Managing the Application
+
+### View logs
+
+```bash
+# All services
+docker-compose logs -f
+
+# Specific service
+docker-compose logs -f fastapi
+docker-compose logs -f mysql
+```
+
+### Rebuild after code changes
+
+```bash
+docker-compose up -d --build
+```
+
+### Stop the application
 
 ```bash
 docker-compose down
 ```
 
-To remove volumes (delete all data):
+### Stop and remove all data (including database)
 
 ```bash
 docker-compose down -v
+```
+
+### Restart a specific service
+
+```bash
+docker-compose restart fastapi
 ```
 
 ## Development
@@ -436,24 +734,133 @@ Set a breakpoint in the OAuth verification function:
 **"Code changes not reloading"**
 - Confirm `DEBUG=true` enables `--reload`
 - Check volume mapping in `docker-compose.yml`: `./app:/app`
-- Restart containers if needed: `docker-compose restart fastapi`
+- **Restart containers if needed: `docker-compose restart fastapi`
 
-To view logs:
+---
 
-```bash
-# All services
-docker-compose logs -f
+## OAuth Setup (Detailed)
 
-# Specific service
-docker-compose logs -f fastapi
-docker-compose logs -f mysql
-```
+This section provides detailed instructions for setting up Google OAuth credentials. **You only need to do this once** to get your `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
 
-To rebuild after code changes:
+### How OAuth Works in This App
 
-```bash
-docker-compose up -d --build
-```
+This API uses **token validation** rather than **OAuth flow handling**:
+
+1. **You get tokens** from Google (via OAuth Playground, Bruno, Postman, etc.)
+2. **You send tokens** to this API in the `Authorization: Bearer` header
+3. **API validates tokens** directly with Google's public keys
+
+**This means:**
+- ❌ The API doesn't redirect users to Google
+- ❌ The API doesn't handle OAuth callbacks
+- ✅ The API only validates ID tokens sent by clients
+- ✅ Callback URLs are configured for the tool you use to GET tokens
+
+### Step 1: Create a Google Cloud Project
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Click "Select a Project" → "New Project"
+3. Enter a project name (e.g., "Stock Watchlist API")
+4. Click "Create"
+
+### Step 2: Configure OAuth Consent Screen
+
+1. Go to "APIs & Services" → "OAuth consent screen"
+2. Select "External" (unless you have a Google Workspace)
+3. Click "Create"
+4. Fill in the required fields:
+   - **App name**: Stock Watchlist API
+   - **User support email**: Your email
+   - **Developer contact information**: Your email
+5. Click "Save and Continue"
+6. **Scopes**: Click "Add or Remove Scopes"
+   - Add `openid`
+   - Add `email`
+   - Add `profile`
+7. Click "Save and Continue"
+8. **Test users**: Add your Google email address (required for External apps in testing)
+9. Click "Save and Continue"
+
+### Step 3: Create OAuth 2.0 Credentials
+
+1. Go to "APIs & Services" → "Credentials"
+2. Click "Create Credentials" → "OAuth client ID"
+3. Select "Web application"
+4. Fill in the fields:
+   - **Name**: Stock Watchlist API Client
+   - **Authorized JavaScript origins**: `http://localhost:8000`
+   - **Authorized redirect URIs**: 
+     - `https://developers.google.com/oauthplayground` (for OAuth Playground)
+     - `https://oauth.pstmn.io/v1/callback` (for Postman/Bruno)
+5. Click "Create"
+6. **IMPORTANT**: Copy your **Client ID** and **Client Secret**
+   - Client ID looks like: `123456789-abcdefg.apps.googleusercontent.com`
+   - Client Secret looks like: `GOCSPX-abcdefghijklmnop`
+7. Add these to your `.env` file
+
+### Getting Tokens for Testing
+
+#### Method 1: OAuth 2.0 Playground (Easiest)
+
+1. Go to [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground/)
+2. Click the gear icon (⚙️) in the top right
+3. Check "Use your own OAuth credentials"
+4. Enter your **Client ID** and **Client Secret**
+5. In the left panel, select "Google OAuth2 API v2"
+6. Check `userinfo.email` and `userinfo.profile`
+7. Click "Authorize APIs"
+8. Sign in with your Google account
+9. Click "Exchange authorization code for tokens"
+10. Copy the **ID token** (not the access token!)
+11. Use this in your `Authorization: Bearer` header
+
+**Note**: Tokens expire after 1 hour. Just repeat steps 9-10 to get a fresh token.
+
+#### Method 2: Using Bruno/Postman
+
+Create a new request with OAuth 2.0 authentication:
+- **Auth Type**: OAuth 2.0
+- **Grant Type**: Authorization Code
+- **Auth URL**: `https://accounts.google.com/o/oauth2/v2/auth`
+- **Access Token URL**: `https://oauth2.googleapis.com/token`
+- **Client ID**: Your Client ID
+- **Client Secret**: Your Client Secret
+- **Scope**: `openid email profile`
+
+After authentication, use the **ID token** (not access token) in your requests.
+
+#### Method 3: Production Apps
+
+For production applications, implement Google Sign-In on your frontend:
+- Use Google Sign-In JavaScript library
+- Get the ID token from the sign-in response
+- Send it to this API in the `Authorization: Bearer` header
+
+### Do You Need an API Key?
+
+**No!** You only need:
+- ✅ **OAuth Client ID** (from Step 3)
+- ✅ **OAuth Client Secret** (from Step 3)
+
+API keys are different and not needed for OAuth authentication.
+
+### OAuth Consent Screen "Unverified App" Warning
+
+When testing, you may see "This app isn't verified":
+- This is normal for apps in testing mode
+- Click "Advanced" → "Go to [app name] (unsafe)" to proceed
+- For production, you need to verify your app with Google
+
+### OAuth Pricing
+
+- **Free tier**: Up to 50,000 requests per day
+- **Cost**: Free for basic OAuth (email, profile, openid scopes)
+- **No charges** for authentication under reasonable use
+- Only charged for specific Google API calls (Drive, Calendar, etc.)
+
+For more details, see [Google Cloud Pricing](https://cloud.google.com/pricing)
+
+---
 
 ## Troubleshooting
 
@@ -466,29 +873,59 @@ docker-compose up -d --build
 - Check MySQL is healthy: `docker-compose ps`
 - Verify credentials in `.env` file
 
-### OAuth consent screen shows "unverified app"
-- This is normal for apps in testing mode
-- Click "Advanced" → "Go to [app name] (unsafe)" to proceed
-- For production, you need to verify your app with Google
+### "Connection refused" or "ECONNRESET"
+- Ensure containers are running: `docker-compose ps`
+- Check if debugpy is waiting: `docker-compose logs fastapi`
+- If `DEBUG=true`, either attach VS Code debugger or set `DEBUG=false`
+- Restart containers: `docker-compose restart fastapi`
 
-## Google OAuth Pricing
+### Port conflicts
+- If port 8000 or 3306 is already in use:
+  ```bash
+  # Check what's using the port
+  lsof -i :8000
+  lsof -i :3306
+  
+  # Stop other services or change ports in docker-compose.yml
+  ```
 
-- **Free tier**: Up to 50,000 requests per day
-- **Cost**: Free for basic OAuth (email, profile, openid scopes)
-- **No charges** for authentication under reasonable use
-- Only charged for specific Google API calls (Drive, Calendar, etc.)
+### Container won't start
+- Check logs: `docker-compose logs fastapi`
+- Verify environment variables in `.env`
+- Try rebuilding: `docker-compose down && docker-compose up -d --build`
 
-For more details, see [Google Cloud Pricing](https://cloud.google.com/pricing)
+### Permission issues with volumes
+```bash
+# Remove volumes and recreate
+docker-compose down -v
+docker-compose up -d
+```
 
-## Technologies Used
+---
 
-- **FastAPI**: Modern Python web framework
-- **SQLAlchemy**: SQL toolkit and ORM
-- **PyMySQL**: MySQL database adapter
-- **Google OAuth 2.0**: Authentication and identity management
-- **Docker & Docker Compose**: Containerization
-- **MySQL**: Relational database
-- **uv**: Fast Python package installer and resolver
+## Environment Variables Reference
+
+Create a `.env` file with these variables:
+
+```bash
+# MySQL Configuration
+MYSQL_ROOT_PASSWORD=rootpassword      # Root password for MySQL
+MYSQL_DATABASE=stockwatchlist         # Database name
+MYSQL_USER=stockuser                  # MySQL user for the app
+MYSQL_PASSWORD=stockpass              # MySQL user password
+
+# Google OAuth Configuration
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+
+# FastAPI Configuration
+DATABASE_URL=mysql+pymysql://stockuser:stockpass@mysql:3306/stockwatchlist
+
+# Debug Mode (optional)
+DEBUG=false                           # Set to 'true' for VS Code debugging
+```
+
+---
 
 ## License
 
