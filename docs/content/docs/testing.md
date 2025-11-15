@@ -411,4 +411,4 @@ After testing the API:
 2. **[Development Guide](../architecture/)** - Architecture and development info  
 3. **[OAuth Setup](../oauth-setup/)** - Detailed OAuth configuration
 
-Need help? Check the [troubleshooting section](../quick-start/#troubleshooting) in the quick start guide.
+Need help? Check the comprehensive [troubleshooting guide](../troubleshooting/) for common issues and solutions.

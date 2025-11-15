@@ -103,3 +103,4 @@ curl -H "Authorization: Bearer YOUR_GOOGLE_ID_TOKEN" http://localhost:8000/me
 1. [Set up Google OAuth credentials](../oauth-setup/)
 2. [Test the API endpoints](../testing/)
 3. [View API documentation](../../api/)
+4. [Troubleshooting guide](../troubleshooting/) - If you run into issues
