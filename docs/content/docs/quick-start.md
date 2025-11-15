@@ -84,8 +84,22 @@ You should see both containers running:
 - `stock-watchlist-mysql` on port 3306
 - `stock-watchlist-api` on port 8000
 
+## Quick Test
+
+Once running, test the API:
+
+```bash
+# Test health endpoint (no authentication required)
+curl http://localhost:8000/health
+
+# Test with authentication (replace with your Google OAuth token)
+curl -H "Authorization: Bearer YOUR_GOOGLE_ID_TOKEN" http://localhost:8000/me
+```
+
+**Need a test token?** See the [OAuth Setup guide](../oauth-setup/) for getting Google OAuth credentials and tokens.
+
 ## Next Steps
 
 1. [Set up Google OAuth credentials](../oauth-setup/)
 2. [Test the API endpoints](../testing/)
-3. [View API documentation](../api-reference/)
+3. [View API documentation](../../api/)
