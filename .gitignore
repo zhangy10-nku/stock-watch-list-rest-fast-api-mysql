@@ -16,6 +16,10 @@ ENV/
 
 # Environment
 .env
+.env.local
+.env.staging
+.env.production
+.env.bak
 
 # Docker
 *.log
